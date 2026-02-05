@@ -1,0 +1,8 @@
+.venv/
+migrations/*_*.py
+__pycache__/
+.env
+*.sqlite3
+todo.md
+.idea/
+.vscode/

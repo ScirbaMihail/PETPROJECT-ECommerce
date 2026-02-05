@@ -4,4 +4,5 @@ const logoutBtn = document.getElementById("logout-form")
 logoutBtn.addEventListener('submit', async (event) => {
     event.preventDefault()
     await logout()
+    window.location.href = "/frontend"
 })

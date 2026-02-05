@@ -22,10 +22,10 @@ async function setLayout() {
     const logged = await isLogged()
     const authLink = document.getElementById('header__profile__title')
     if (!logged) {
-        authLink.href = "/frontend/login.html"
+        authLink.href = "/frontend/pages/login.html"
         authLink.innerText = "Log in"
     } else {
-        authLink.href = "/frontend/myProfile.html"
+        authLink.href = "/frontend/pages/myProfile.html"
         authLink.innerText = "My profile"
     }
 }

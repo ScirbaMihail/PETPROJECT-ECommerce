@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class CustomTokenObtainSerializer(serializers.Serializer):
+class UserCredentialsSerializer(serializers.Serializer):
     """
     Custom Token Serializer which create token by validating user
     with email instead of username.

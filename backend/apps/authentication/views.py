@@ -15,7 +15,7 @@ from apps.authentication.services import UserService, AuthenticationService
 from apps.authentication.serializers import (
     PerformTransactionSerializer,
     UserSerializer,
-    CustomTokenObtainSerializer,
+    UserCredentialsSerializer,
 )
 
 User = get_user_model()
@@ -23,9 +23,9 @@ User = get_user_model()
 
 # Create your views here.
 class AuthenticationViewSet(ViewSet):
-    serializer_class = CustomTokenObtainSerializer
+    serializer_class = UserCredentialsSerializer
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], serializer_class=[])
     def authentication_status(self, request: Request):
         """
         Check if user is authenticated to handle page state.
@@ -36,18 +36,34 @@ class AuthenticationViewSet(ViewSet):
 
     @action(
         detail=False,
+        methods=["POST"],
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
+    def register(self, request: Request):
+        """
+        Create new user with provided credentials (email, password)
+        """
+        succeeded, _, response_data = AuthenticationService.register(request)
+        return Response(
+            response_data,
+            status=status.HTTP_201_CREATED if succeeded else status.HTTP_409_CONFLICT,
+        )
+
+    @action(
+        detail=False,
         methods=["post"],
         permission_classes=[AllowAny],
         authentication_classes=[],
     )
     def login(self, request: Request):
         # Call login service. If tokens are missing, return HTTP_401
-        data, msg = AuthenticationService.login(request)
-        if not data:
-            return Response({"status": msg}, status=status.HTTP_401_UNAUTHORIZED)
+        succeeded, data, response_data = AuthenticationService.login(request)
+        if not succeeded:
+            return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
         # Set cookies and return HTTP_200 response
-        response = Response({"status": msg}, status=status.HTTP_200_OK)
+        response = Response(response_data, status=status.HTTP_200_OK)
         AuthenticationService.set_refresh_token_cookie(response, data["refresh"])
         AuthenticationService.set_access_token_cookie(response, data["access"])
         return response
@@ -55,7 +71,7 @@ class AuthenticationViewSet(ViewSet):
     @action(detail=False, methods=["post"], serializer_class=None)
     def logout(self, request: Request):
         AuthenticationService.logout(request)
-        response = Response({"status": "logout successful"})
+        response = Response({"status": "success", "message": "logout successful"})
         AuthenticationService.clear_auth_cookies(response)
         return response
 
@@ -71,12 +87,12 @@ class AuthenticationViewSet(ViewSet):
         try:
             # Try to update token, if token missing, return HTTP_401
             # If refresh action failed, return HTTP_401 and clear cookies
-            data, msg = AuthenticationService.refresh_token(request)
-            if not data:
-                return Response({"status": msg}, status=status.HTTP_401_UNAUTHORIZED)
+            succeeded, data, response_data = AuthenticationService.refresh_token(request)
+            if not succeeded:
+                return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
             # Refresh token and set new values into cookies
-            response = Response({"status": msg}, status=status.HTTP_200_OK)
+            response = Response(response_data, status=status.HTTP_200_OK)
             AuthenticationService.set_refresh_token_cookie(response, data["refresh"])
             AuthenticationService.set_access_token_cookie(response, data["access"])
             return response

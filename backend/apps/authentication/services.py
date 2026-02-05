@@ -1,3 +1,6 @@
+# python
+from typing import Tuple, Dict, Any
+
 # django
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
@@ -20,7 +23,31 @@ class AuthenticationService:
     """
 
     @staticmethod
-    def login(request: Request):
+    def register(
+        request: Request,
+    ) -> Tuple[bool, None | Dict[str, str], Dict[str, str]]:
+        data = request.data
+        email = data["email"]
+        password = data["password"]
+
+        try:
+            User.objects.create_user(email=email, password=password, balance=0)
+            return (
+                True,
+                None,
+                {"status": "success", "message": "User created successfully"},
+            )
+        except:
+            return (
+                False,
+                None,
+                {"status": "failed", "message": "Email is already in use"},
+            )
+
+    @staticmethod
+    def login(
+        request: Request,
+    ) -> Tuple[bool, None | Dict[str, str], Dict[str, str]]:
         # Read credentials from request (payload)
         data = request.data
         email = data["email"]
@@ -29,14 +56,18 @@ class AuthenticationService:
         # Validate user
         user = authenticate(request, username=email, password=password)
         if not user or not user.is_active:
-            return None, "Invalid credentials"
+            return False, None, {"status": "failed", "message": "Invalid credentials"}
 
         # Generate token
         refresh = RefreshToken.for_user(user)
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }, "logged in successfully"
+        return (
+            True,
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            },
+            {"status": "success", "message": "logged in successfully"},
+        )
 
     @staticmethod
     def logout(request: Request):
@@ -57,7 +88,7 @@ class AuthenticationService:
         refresh_token = request.COOKIES.get("refresh_token")
 
         if refresh_token is None:
-            return None, "token not found"
+            return False, None, {"status": "failed", "message": "token not found"}
 
         # Check user from token to ensure user is logged in.
         # Otherwise there's a big chance to enter in infinite validation flow.
@@ -68,10 +99,14 @@ class AuthenticationService:
         # Refresh token
         refresh = RefreshToken(refresh_token)
         access = refresh.access_token
-        return {
-            "refresh": str(refresh),
-            "access": str(access),
-        }, "token refreshed successfully"
+        return (
+            True,
+            {
+                "refresh": str(refresh),
+                "access": str(access),
+            },
+            {"status": "success", "message": "token refreshed successfully"},
+        )
 
     @staticmethod
     def set_access_token_cookie(response: Response, access_token: str):

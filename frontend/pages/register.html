@@ -5,14 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module" src="/frontend/assets/js/layout.js"></script>
-  <script type="module" src="/frontend/assets/js/pages/login.js"></script>
+  <script type="module" src="/frontend/assets/js/pages/register.js"></script>
   <link rel="stylesheet" href="/frontend/assets/css/onlyFormPage.css">
   <title>Home</title>
 </head>
 
 <body>
   <header id="header-container"></header>
-  <form method="post" class="form" id="login-form">
+  <form method="post" class="form" id="register-form">
     <div class="form__row">
       <label for="email">Email</label>
       <input type="email" name="email" id="email" />
@@ -21,10 +21,13 @@
       <label for="password">Password</label>
       <input type="password" name="password" id="password" />
     </div>
+    <div class="form__row">
+      <label for="confirm-password">Confirm password</label>
+      <input type="password" name="confirm-password" id="confirm-password" />
+    </div>
 
-    <p>Do not have account yet? <a href="/frontend/pages/register.html">Register here</a></p>
-    <p id="error-message">Wrong email or password</p>
-    <button type="submit">Log in</button>
+    <p id="error-message"></p>
+    <button type="submit">Register</button>
   </form>
 </body>
 

@@ -68,6 +68,19 @@ export async function login(email, password) {
     }
 }
 
+export async function register(email, password) {
+    const credentials = {
+        "email": email,
+        "password": password
+    }
+    try {
+        await fetchWithAuth('auth/register/', { method: "POST", body: JSON.stringify(credentials) })
+        return true
+    } catch {
+        return false
+    }
+}
+
 export async function logout() {
     try {
         await fetchWithAuth("auth/logout/", { method: "POST" })

@@ -20,12 +20,20 @@ async function setLayout() {
 
     // *********************** Mange content on auth status
     const logged = await isLogged()
-    const authLink = document.getElementById('header__profile__title')
-    if (!logged) {
-        authLink.href = "/frontend/pages/login.html"
-        authLink.innerText = "Log in"
+    const authBtn = document.getElementById('authBtn')
+
+    const textElem = authBtn.querySelector('span')
+    let redirect_url
+    if (logged) {
+        textElem.innerText = "My Profile"
+        redirect_url = "/frontend/pages/myProfile.html"
     } else {
-        authLink.href = "/frontend/pages/myProfile.html"
-        authLink.innerText = "My profile"
+        textElem.innerText = "Log in"
+        redirect_url = "/frontend/pages/login.html"
     }
+
+    authBtn.addEventListener('click', (event) => {
+        event.preventDefault()
+        window.location.href = redirect_url
+    })
 }
